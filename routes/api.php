@@ -12,6 +12,7 @@ use App\Http\Controllers\Products\ProductsController;
 use App\Http\Controllers\Clients\ClientsController;
 use App\Http\Controllers\Bills\BillsController;
 use App\Http\Controllers\Scaner\ScanerController;
+use App\Http\Controllers\Users\UsersController;
 use App\Models\Warehouses;
 use App\Models\Products;
 use App\Models\Supplier;
@@ -100,11 +101,22 @@ Route::middleware('auth:sanctum')->group(function(){
     });
 
     Route::prefix('/bills')->group(function () {
+        Route::get('', [BillsController::class, 'index'])->name('listBills');
         Route::post('/create', [BillsController::class, 'create'])->name('addBill');
+    });
+
+    Route::prefix('/users')->group(function() {
+        Route::get('', [UsersController::class, 'index'])->name('getUsers');
+        Route::post('find', [UsersController::class, 'find'])->name('getUserById');
+        Route::post('findEmail', [UsersController::class, 'findEmail'])->name('getUserByEmail');
+        Route::post('/create', [UsersController::class, 'create'])->name('createUser');
     });
 
     Route::post('/scaner/register', [ScanerController::class, 'register'])->name('registerScan');
 });
+
+
+Route::get('/bills/{id}/pdf', [BillsController::class, 'download'])->name('getPdfBill');
 
 Route::get('/barcode/{id}', [ProductsController::class, 'barcode'])->name('getBarcode');
 

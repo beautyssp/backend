@@ -2,16 +2,22 @@
 
 namespace App\Http\Controllers\Scaner;
 
-use App\Events\ScanerEvent;
+use App\Events\RegisterScanerEvent;
 use App\Http\Controllers\Controller;
+use App\Models\Scaners;
 use Illuminate\Http\Request;
 
 class ScanerController extends Controller
 {
-    public function register(){
+    public function register(Request $request){
         try {
-            $event = event(new ScanerEvent('Hello Test'));
-            return response()->json([ 'error' => $event ]);
+            $data = [
+                'user_id' => $request->user()->id,
+                'socket' => $request->input('socket')
+            ];
+            $device = Scaners::create($data);
+            $event = event(new RegisterScanerEvent($device));
+            return response()->json([ 'error' => $event, 'here' =>'asdad' ]);
         } catch (\Throwable $th) {
             return response()->json([ 'error' => $th->getMessage() ]);
         }

@@ -15,6 +15,12 @@ class CreateScanersTable extends Migration
     {
         Schema::create('scaners', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->string('socket');
+
+            $table->foreignId('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
             $table->timestamps();
         });
     }

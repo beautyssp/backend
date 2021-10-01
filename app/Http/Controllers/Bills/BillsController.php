@@ -13,10 +13,25 @@ use App\Models\HistoryChangeProducts;
 
 class BillsController extends Controller
 {
-    public function create(Request $request){
-        try {
 
-            $dataBill = $request->only('total','discounts','subtotal','warehouse_id','client_id');
+    public function index(Request $request)
+    {
+        try {
+            $bills = Bills::all();
+            foreach ($bills as &$bill) {
+                $bill->warehouse;
+                $bill->client;
+            }
+            return response()->json(['data' => $bills]);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()]);
+        }
+    }
+
+    public function create(Request $request)
+    {
+        try {
+            $dataBill = $request->only('total', 'discounts', 'subtotal', 'warehouse_id', 'client_id');
             $validator = $this->validator($dataBill);
 
             if ($validator->fails()) {
@@ -29,7 +44,7 @@ class BillsController extends Controller
 
             $id = $request->input('id');
 
-            if(isset($id) && $id != 'null'){
+            if (isset($id) && $id != 'null') {
                 $bill = Bills::find($id);
                 $data['last_update_by'] = $request->user()->id;
                 $bill->update($dataBill);
@@ -58,9 +73,9 @@ class BillsController extends Controller
                     'create_by' => $request->user()->id
                 ]);
             }
-            return response()->json([ 'success' => 'OK' ]);
+            return response()->json(['success' => 'OK']);
         } catch (\Throwable $th) {
-            return response()->json([ 'error' => $th->getMessage() ]);
+            return response()->json(['error' => $th->getMessage()]);
         }
     }
 
@@ -70,9 +85,18 @@ class BillsController extends Controller
             'total' => ['required'],
             'discounts' => ['required'],
             'subtotal' => ['required'],
-            'warehouse_id' => ['required','exists:warehouses,id'],
-            'client_id' => ['required','exists:clients,id']
+            'warehouse_id' => ['required', 'exists:warehouses,id'],
+            'client_id' => ['required', 'exists:clients,id']
         ];
         return Validator::make($data, $rules);
+    }
+
+    public function download()
+    {
+        $data = [
+            'titulo' => 'Styde.net'
+        ];
+
+        return \PDF::loadView('pdf.bill', $data)->stream('archivo.pdf');
     }
 }
