@@ -58,7 +58,7 @@ class UsersController extends Controller
     
             $id = $request->input('id');
             $pass = $request->input('password');
-            $data = $request->only('name','lastname','email','permissions');
+            $data = $request->only('name','lastname','type','email','permissions');
             if(isset($pass)){
                 $data['password'] = Hash::make($pass);
             }

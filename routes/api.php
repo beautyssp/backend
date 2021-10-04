@@ -103,6 +103,7 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::prefix('/bills')->group(function () {
         Route::get('', [BillsController::class, 'index'])->name('listBills');
         Route::post('/create', [BillsController::class, 'create'])->name('addBill');
+        Route::post('/getLinkPdf', [BillsController::class, 'getLinkPdf'])->name('getLinkPdf');
     });
 
     Route::prefix('/users')->group(function() {
@@ -112,11 +113,14 @@ Route::middleware('auth:sanctum')->group(function(){
         Route::post('/create', [UsersController::class, 'create'])->name('createUser');
     });
 
-    Route::post('/scaner/register', [ScanerController::class, 'register'])->name('registerScan');
+    Route::prefix('/scaner')->group(function(){
+        Route::post('register', [ScanerController::class, 'register'])->name('registerScan');
+        Route::post('sendEan', [ScanerController::class, 'sendEan'])->name('sendEan');
+    });
+
+
 });
 
-
-Route::get('/bills/{id}/pdf', [BillsController::class, 'download'])->name('getPdfBill');
-
+Route::get('/bills/{id}/pdf', [BillsController::class, 'download'])->name('getPdfBill')->middleware('signed');
 Route::get('/barcode/{id}', [ProductsController::class, 'barcode'])->name('getBarcode');
 

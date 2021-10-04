@@ -11,20 +11,22 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Ratchet\ConnectionInterface;
 
-class RegisterScanerEvent implements ShouldBroadcast
+class ScanerEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $message;
+    private $scanerID;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($message)
+    public function __construct($message, $scanerID)
     {
         $this->message = $message;
+        $this->scanerID = $scanerID;
     }
 
     /**
@@ -34,7 +36,7 @@ class RegisterScanerEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PresenceChannel('channel-devices');
+        return new PresenceChannel('channel-scaner.'.$this->scanerID);
     }
 
 }

@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Bills;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 
 use App\Models\Bills;
 use App\Models\SoldProducts;
 use App\Models\QuantityProducts;
 use App\Models\HistoryChangeProducts;
+
+use Carbon\Carbon;
 
 class BillsController extends Controller
 {
@@ -31,7 +34,7 @@ class BillsController extends Controller
     public function create(Request $request)
     {
         try {
-            $dataBill = $request->only('total', 'discounts', 'subtotal', 'warehouse_id', 'client_id');
+            $dataBill = $request->only('total', 'discounts', 'subtotal', 'warehouse_id', 'client_id', 'observations');
             $validator = $this->validator($dataBill);
 
             if ($validator->fails()) {
@@ -58,7 +61,8 @@ class BillsController extends Controller
                     'product_id' => $product->id,
                     'bill_id' => $bill->id,
                     'quantity' => $product->quantity,
-                    'total' => $product->total
+                    'total' => $product->total,
+                    'discount' => $product->discount
                 ]);
                 $dataQuantity = QuantityProducts::where(['warehouse_id' => $bill->warehouse_id, 'product_id' => $product->id])->first();
                 $dataQuantity->update([
@@ -91,12 +95,49 @@ class BillsController extends Controller
         return Validator::make($data, $rules);
     }
 
-    public function download()
+    public function download(Request $request)
     {
-        $data = [
-            'titulo' => 'Styde.net'
-        ];
 
-        return \PDF::loadView('pdf.bill', $data)->stream('archivo.pdf');
+        $bill = Bills::find($request->id);
+        $bill->client;
+        $bill->warehouse;
+        $bill->products = $bill->products;
+        $bill['total'] = number_format($bill['total'], 0, '.', '.');
+        $bill['totalBruto'] = number_format($bill['subtotal'], 0, '.', '.');
+        $bill['subtotal'] = intval($bill['subtotal']) - intval($bill['discounts']);
+        $bill['subtotal'] = number_format($bill['subtotal'], 0, '.', '.');
+        $bill['discounts'] = number_format($bill['discounts'], 0, '.', '.');
+        $bill['date'] = Carbon::parse($bill['created_at'])->format('M d Y');
+        $bill['now'] = Carbon::now()->format('M d Y');
+        $bill['year'] = Carbon::now()->format('Y');
+
+        foreach ($bill->products as &$product) {
+            $product->product = $product->product;
+            
+            $product['product']['price'] = number_format($product['product']['price'], 0, '.', '.');
+            $product['total'] = number_format($product['total'], 0, '.', '.');
+            $product['discount'] = number_format($product['discount'], 0, '.', '.');
+        }
+
+        return \PDF::loadView('pdf.bill', $bill)->stream('archivo.pdf');
     }
+
+    public function getLinkPdf(Request $request)
+    {
+        $rule = [
+            'id' => ['require','exists:bills']
+        ];
+        
+        $id = $request->input('id');
+        if(!isset($id)){
+            return response()->json([
+                'error' => 'Field id is required'
+            ]);
+        }
+
+        $url = URL::temporarySignedRoute('getPdfBill', now()->addMinutes(2), ['id' => $id]);
+
+        return response()->json([ 'url' => $url ]);
+    }
+
 }

@@ -17,6 +17,7 @@ class CreateBillsTable extends Migration
             $table->id();
             $table->string('total');
             $table->string('discounts');
+            $table->string('observations');
             $table->string('subtotal');
             $table->foreignId('client_id');
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');

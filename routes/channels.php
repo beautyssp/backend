@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Broadcast;
 
+use App\Models\User;
+
 /*
 |--------------------------------------------------------------------------
 | Broadcast Channels
@@ -15,4 +17,14 @@ use Illuminate\Support\Facades\Broadcast;
 
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
+});
+
+Broadcast::channel('channel-devices', function ($user) {
+    unset($user['permissions']);
+    return $user;
+});
+
+Broadcast::channel('channel-scaner.{id}', function ($user, $id) {
+    unset($user['permissions']);
+    return $user;
 });

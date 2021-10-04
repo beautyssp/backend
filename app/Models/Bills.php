@@ -9,7 +9,7 @@ class Bills extends Model
 {
     use SoftDeletes;
     public $table = 'bills';
-    protected $fillable = ['client_id','warehouse_id','total','discounts','subtotal','create_by','last_update_by'];
+    protected $fillable = ['client_id','warehouse_id','total','discounts','observations','subtotal','create_by','last_update_by'];
 
     public function warehouse(){
         return $this->belongsTo(Warehouses::class);
@@ -17,6 +17,10 @@ class Bills extends Model
 
     public function client(){
         return $this->belongsTo(Client::class);
+    }
+
+    public function products(){
+        return $this->hasMany(SoldProducts::class,'bill_id');
     }
 
 
