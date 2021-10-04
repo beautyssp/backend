@@ -38,7 +38,7 @@ return [
             'options' => [
                 'cluster' => env('PUSHER_APP_CLUSTER'),
                 'useTLS' => true,
-                'host' => env('PUSHER_HOST'),
+                'host' => env('PUSHER_APP_PATH'),
                 'port' => 6001,
                 'scheme' => env('PUSHER_SCHEME')
             ],
