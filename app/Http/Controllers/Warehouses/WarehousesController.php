@@ -40,6 +40,7 @@ class WarehousesController extends Controller
             $warehouse->QuantityProducts = $warehouse->QuantityProducts;
             $warehouse->OutHistory->whereBetween('created_at',[$sart,$end]);
             $warehouse->InHistory->whereBetween('created_at',[$sart,$end]);
+            return response()->json([ 'error' => $warehouse ]);
             foreach ($warehouse->QuantityProducts as &$QuantityProduct) {
                 $QuantityProduct->product = $QuantityProduct->product;
                 $QuantityProduct->product->supplier;

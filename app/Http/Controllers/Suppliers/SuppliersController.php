@@ -128,9 +128,11 @@ class SuppliersController extends Controller
         try {
             $supplier = Supplier::find($id);
             $certifiaction = FilesModel::find($supplier->bank_certificate);
-            $file_path = public_path().'/storage/suppliers/'.$supplier->id.'/'.$certifiaction->name;
-            unlink($file_path);
-            FilesModel::destroy($certifiaction->id);
+            if($certifiaction){
+                $file_path = public_path().'/storage/suppliers/'.$supplier->id.'/'.$certifiaction->name;
+                unlink($file_path);
+                FilesModel::destroy($certifiaction->id);
+            }
             Supplier::destroy($id);
             return response()->json([ 'success' => 'OK' ]);
         } catch (\Throwable $th) {
