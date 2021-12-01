@@ -87,7 +87,7 @@ class WarehousesController extends Controller
 
     public function delete($id){
         try {
-            $warehouse = Warehouses::find($id)->with(['QuantityProducts']);
+            $warehouse = Warehouses::with(['QuantityProducts'])->find($id);
             foreach ($warehouse->QuantityProducts as $QuantityProduct) {
                 $QuantityProduct = QuantityProducts::find($QuantityProduct->id);
                 $QuantityProductPrincipal = QuantityProducts::where([
