@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Products extends Model
 {
-    use SoftDeletes;
+    use HasFactory;
     public $table = 'products';
     protected $fillable = ['ean', 'sku_plu', 'name', 'price', 'supplier_id', 'subcategory_id', 'brand', 'units', 'health_register_file_id', 'create_by','last_update_by'];
 

@@ -143,7 +143,7 @@ class ProductsController extends Controller
 
     public function delete($id){
         try {
-            Products::destroy($id);
+            Products::find($id)->delete();
             return response()->json([ 'success' => 'OK' ]);
         } catch (\Throwable $th) {
             return response()->json(['Error' => $th->getMessage()]);

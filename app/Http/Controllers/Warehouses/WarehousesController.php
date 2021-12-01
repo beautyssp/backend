@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Warehouses;
 
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
+use App\Models\QuantityProducts;
 use Illuminate\Http\Request;
 
 use App\Models\Warehouses;
@@ -86,6 +87,21 @@ class WarehousesController extends Controller
 
     public function delete($id){
         try {
+            $warehouse = Warehouses::find($id)->with(['QuantityProducts']);
+            foreach ($warehouse->QuantityProducts as $QuantityProduct) {
+                $QuantityProduct = QuantityProducts::find($QuantityProduct->id);
+                $QuantityProductPrincipal = QuantityProducts::where([
+                    'product_id' => $QuantityProduct->product_id,
+                    'warehouse_id' => 1
+                ]);
+                (int) $quantityPrincipal = $QuantityProduct->quantity;
+                (int) $quantity = $QuantityProductPrincipal->quantity;
+                $total = $quantityPrincipal + $quantity;
+                $QuantityProductPrincipal->update([
+                    'quantity' => $total
+                ]);
+                $QuantityProduct->update([ 'quantity' => 0 ]);
+            }
             Warehouses::destroy($id);
             return response()->json([ 'success' => 'OK' ]);
         } catch (\Throwable $th) {
