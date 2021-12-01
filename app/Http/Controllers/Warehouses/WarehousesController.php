@@ -93,7 +93,7 @@ class WarehousesController extends Controller
                 $QuantityProductPrincipal = QuantityProducts::where([
                     'product_id' => $QuantityProduct->product_id,
                     'warehouse_id' => 1
-                ]);
+                ])->first();
                 (int) $quantityPrincipal = $QuantityProduct->quantity;
                 (int) $quantity = $QuantityProductPrincipal->quantity;
                 $total = $quantityPrincipal + $quantity;
