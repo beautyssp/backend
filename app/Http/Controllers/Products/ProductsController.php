@@ -81,7 +81,42 @@ class ProductsController extends Controller
             if(isset($id) && $id != 'null'){
                 $product = Products::find($id);
                 $data['last_update_by'] = $request->user()->id;
+                $aditionalQuantity = 0;
+                if(isset($data['units'])){
+                    $aditionalQuantity = $data['units'] - $product->units;
+                }
                 $product->update($data);
+
+                // UPDATE VALUE IN GENERAL WAREHOUSE
+                $quantity = QuantityProducts::where([
+                    'product_id' => $product->id,
+                    'warehouse_id' => 1
+                ])->first();
+                $quantity->update(['price' => $product['price']]);
+                if($aditionalQuantity > 0){
+                    $quantity->update(['quantity' => ($quantity->quantity + $aditionalQuantity)]);
+                    HistoryChangeProducts::create([
+                        'quantity' => $aditionalQuantity,
+                        'product_id' => $product->id,
+                        'warehouse_to' => 1,
+                        'warehouse_from' => null,
+                        'create_by' => $request->user()->id
+                    ]);
+                }
+
+                // UPDATE VALUE IN WAREHOUSE
+                $quantitys = QuantityProducts::where(['product_id' => $product->id])->get();
+                foreach ($quantitys as $quantity) {
+                    $quantity = QuantityProducts::find($quantity->id);
+                    $warehouse = Warehouses::find($quantity->warehouse_id);
+                    $percent = $warehouse->percent_to_change;
+                    $totalPrice = $product->price;
+                    if($percent){
+                        $totalPrice = $product->price + ($product->price * ($percent/100));
+                    }
+                    $quantity->update(['price' => intval($totalPrice)]);
+                }
+
                 if(isset($file)){
                     $health_register = FilesModel::find($product->health_register_file_id);
                     if(isset($health_register)){
@@ -120,6 +155,15 @@ class ProductsController extends Controller
         }
     }
 
+    public function addUnits(Request $request,$id)
+    {
+        try {
+            $product = Products::find($id);
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+    }
+
     private function createProduct($data){
         $product = Products::create($data);
 
@@ -152,18 +196,20 @@ class ProductsController extends Controller
 
     public function changeWarehouse(Request $request){
         $data = $request->only('product_id','warehouse_to','warehouse_from','quantity');
-        $warehouse = Warehouses::find($data['warehouse_from']);
+        $warehouse = Warehouses::find($data['warehouse_to']);
         $product = Products::find($data['product_id']);
         $percent = $warehouse->percent_to_change;
         $quantity = QuantityProducts::where([
-            ['product_id', '=', $data['product_id']],
-            ['warehouse_id', '=', $data['warehouse_to']]
+            'product_id' => $data['product_id'],
+            'warehouse_id' => $data['warehouse_to']
         ])->first();
+        $totalPrice = $percent? ($product->price + ($product->price * ($percent/100))) : $product->price;
         if(isset($quantity)){
             $quantity = QuantityProducts::find($quantity->id);
             $quantity->update([
                 'quantity' => $data['quantity'] + $quantity['quantity'],
-                'last_update_by' => $request->user()->id
+                'last_update_by' => $request->user()->id,
+                'price' => intval($totalPrice)
             ]);
             HistoryChangeProducts::create([
                 'quantity' => $data['quantity'],
@@ -177,7 +223,7 @@ class ProductsController extends Controller
                 'product_id' => $data['product_id'],
                 'warehouse_id' => $data['warehouse_to'],
                 'quantity' => $data['quantity'],
-                'price' => $percent? ($product->price + ($product->price * ($percent/100))) : $product->price,
+                'price' => intval($totalPrice),
                 'create_by' => $request->user()->id
             ]);
             HistoryChangeProducts::create([

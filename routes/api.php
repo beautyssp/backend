@@ -96,6 +96,7 @@ Route::middleware('auth:sanctum')->group(function(){
         Route::get('', [ProductsController::class, 'index'])->name('listProducts');
         Route::post('/find', [ProductsController::class, 'search'])->name('findProduct');
         Route::post('/create', [ProductsController::class, 'create'])->name('addProducts');
+        Route::post('/addUnits/{id}', [ProductsController::class, 'addUnits'])->name('addUnitsProducts');
         Route::post('/changeWarehouse', [ProductsController::class, 'changeWarehouse'])->name('changeWarehouse');
         Route::delete('/{id}', [ProductsController::class, 'delete'])->name('deleteProducts');
     });
@@ -117,7 +118,6 @@ Route::middleware('auth:sanctum')->group(function(){
         Route::post('register', [ScanerController::class, 'register'])->name('registerScan');
         Route::post('sendEan', [ScanerController::class, 'sendEan'])->name('sendEan');
     });
-
 
 });
 

@@ -11,7 +11,7 @@ use App\Models\Bills;
 use App\Models\SoldProducts;
 use App\Models\QuantityProducts;
 use App\Models\HistoryChangeProducts;
-
+use App\Models\Products;
 use Carbon\Carbon;
 
 class BillsController extends Controller
@@ -69,6 +69,11 @@ class BillsController extends Controller
                     'quantity'  =>  $dataQuantity->quantity - $product->quantity,
                     'last_update_by' => $request->user()->id
                 ]);
+                $productRow = Products::find($product->id);
+                $productRow->update([
+                    'units'  =>  $productRow->units - $product->quantity,
+                    'last_update_by' => $request->user()->id
+                ]);
                 HistoryChangeProducts::create([
                     'quantity' => $product->quantity,
                     'product_id' => $product->id,
@@ -114,6 +119,7 @@ class BillsController extends Controller
         foreach ($bill->products as &$product) {
             $product->product = $product->product;
             
+            $product['product']['price'] = $product['total']/$product['quantity'];
             $product['product']['price'] = number_format($product['product']['price'], 0, '.', '.');
             $product['total'] = number_format($product['total'], 0, '.', '.');
             $product['discount'] = number_format($product['discount'], 0, '.', '.');

@@ -166,7 +166,7 @@
             <td>
                 <label>Nota:</label>
                 <div class="boxDesc">
-                    {{ $observations }}
+                    {{ $observations == 'null'? 'Sin observaciones' : $observations  }}
                 </div>
             </td>
             <td style="padding: 0 0 0 30px;">
