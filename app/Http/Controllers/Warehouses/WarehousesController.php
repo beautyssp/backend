@@ -63,7 +63,7 @@ class WarehousesController extends Controller
                 ], 200);
             }
 
-            $data = $request->only('description','percent_to_change','increase');
+            $data = $request->only('description','percent_to_change');
 
             $id = $request->input('id');
 
@@ -71,7 +71,7 @@ class WarehousesController extends Controller
                 $warehouse = Warehouses::find($id);
                 $warehouse->update([
                     'description' => $data['description'],
-                    'percent_to_change' => $data['increase'],
+                    'percent_to_change' => $data['percent_to_change'],
                     'last_update_by' => $request->user()->id
                 ]);
             } else {
