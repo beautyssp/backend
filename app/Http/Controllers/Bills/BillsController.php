@@ -45,6 +45,8 @@ class BillsController extends Controller
 
             $id = $request->input('id');
 
+            return response()->json(['error' => $id]);
+
             if (isset($id) && $id != 'null') {
                 $bill = Bills::find($id);
                 $data['last_update_by'] = $request->user()->id;
