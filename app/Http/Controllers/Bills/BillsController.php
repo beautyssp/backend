@@ -43,8 +43,6 @@ class BillsController extends Controller
                 ], 200);
             }
 
-            $products = json_decode($request->input('products'));
-
             $id = $request->input('id');
 
             if (isset($id) && $id != 'null') {
@@ -56,31 +54,34 @@ class BillsController extends Controller
                 $bill = Bills::create($dataBill);
             }
 
-            foreach ($products as $product) {
-                SoldProducts::create([
-                    'product_id' => $product->id,
-                    'bill_id' => $bill->id,
-                    'quantity' => $product->quantity,
-                    'total' => $product->total,
-                    'discount' => $product->discount
-                ]);
-                $dataQuantity = QuantityProducts::where(['warehouse_id' => $bill->warehouse_id, 'product_id' => $product->id])->first();
-                $dataQuantity->update([
-                    'quantity'  =>  $dataQuantity->quantity - $product->quantity,
-                    'last_update_by' => $request->user()->id
-                ]);
-                $productRow = Products::find($product->id);
-                $productRow->update([
-                    'units'  =>  $productRow->units - $product->quantity,
-                    'last_update_by' => $request->user()->id
-                ]);
-                HistoryChangeProducts::create([
-                    'quantity' => $product->quantity,
-                    'product_id' => $product->id,
-                    'warehouse_to' => NULL,
-                    'warehouse_from' => $bill->warehouse_id,
-                    'create_by' => $request->user()->id
-                ]);
+            if(isset($request->products)){
+                $products = json_decode($request->input('products'));
+                foreach ($products as $product) {
+                    SoldProducts::create([
+                        'product_id' => $product->id,
+                        'bill_id' => $bill->id,
+                        'quantity' => $product->quantity,
+                        'total' => $product->total,
+                        'discount' => $product->discount
+                    ]);
+                    $dataQuantity = QuantityProducts::where(['warehouse_id' => $bill->warehouse_id, 'product_id' => $product->id])->first();
+                    $dataQuantity->update([
+                        'quantity'  =>  $dataQuantity->quantity - $product->quantity,
+                        'last_update_by' => $request->user()->id
+                    ]);
+                    $productRow = Products::find($product->id);
+                    $productRow->update([
+                        'units'  =>  $productRow->units - $product->quantity,
+                        'last_update_by' => $request->user()->id
+                    ]);
+                    HistoryChangeProducts::create([
+                        'quantity' => $product->quantity,
+                        'product_id' => $product->id,
+                        'warehouse_to' => NULL,
+                        'warehouse_from' => $bill->warehouse_id,
+                        'create_by' => $request->user()->id
+                    ]);
+                }
             }
             return response()->json(['success' => 'OK']);
         } catch (\Throwable $th) {
