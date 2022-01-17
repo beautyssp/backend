@@ -63,7 +63,7 @@ class WarehousesController extends Controller
                 ], 200);
             }
 
-            $data = $request->only('description','percent_to_change');
+            $data = $request->only('description','percent_to_change','increase');
 
             $id = $request->input('id');
 
