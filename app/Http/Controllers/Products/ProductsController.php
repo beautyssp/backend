@@ -106,16 +106,17 @@ class ProductsController extends Controller
 
                 // UPDATE VALUE IN WAREHOUSE
                 $quantitys = QuantityProducts::where(['product_id' => $product->id])->get();
-                return response()->json(['error' => $quantitys]);
                 foreach ($quantitys as $quantity) {
                     $quantity = QuantityProducts::find($quantity->id);
                     $warehouse = Warehouses::find($quantity->warehouse_id);
-                    $percent = $warehouse->percent_to_change;
-                    $totalPrice = $product->price;
-                    if($percent){
-                        $totalPrice = $product->price + ($product->price * ($percent/100));
+                    if($warehouse){
+                        $percent = $warehouse->percent_to_change;
+                        $totalPrice = $product->price;
+                        if($percent){
+                            $totalPrice = $product->price + ($product->price * ($percent/100));
+                        }
+                        $quantity->update(['price' => intval($totalPrice)]);
                     }
-                    $quantity->update(['price' => intval($totalPrice)]);
                 }
 
                 if(isset($file)){
