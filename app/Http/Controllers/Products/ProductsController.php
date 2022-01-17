@@ -106,6 +106,7 @@ class ProductsController extends Controller
 
                 // UPDATE VALUE IN WAREHOUSE
                 $quantitys = QuantityProducts::where(['product_id' => $product->id])->get();
+                return response()->json(['error' => $quantitys]);
                 foreach ($quantitys as $quantity) {
                     $quantity = QuantityProducts::find($quantity->id);
                     $warehouse = Warehouses::find($quantity->warehouse_id);
